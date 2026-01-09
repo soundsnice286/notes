@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>好像不錯</title>
+    <style>
+        body { 
+            background-color: #f2ede4; 
+            color: #333333; 
+            font-family: "Noto Serif TC", serif; 
+            text-align: center; 
+            margin: 0; 
+            padding: 40px 20px; 
+            user-select: none;
+        }
+
+        .container { max-width: 500px; margin: 0 auto; }
+        h1 { font-size: 2rem; letter-spacing: 2px; margin-bottom: 8px; cursor: default; }
+        p { font-size: 1.1rem; opacity: 0.8; margin-bottom: 30px; cursor: default; }
+
+        .note-box { 
+            background: transparent; 
+            min-height: 350px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            margin-bottom: 20px;
+            perspective: 1000px; /* 為動畫增加透視感 */
+        }
+
+        #note-img { 
+            width: 100%; 
+            max-width: 400px; 
+            height: auto; 
+            opacity: 0; 
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease; 
+        }
+
+        /* 圖片載入後的動畫狀態 */
+        #note-img.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        button { 
+            background: #5d5d5d; color: white; border: none; 
+            padding: 12px 28px; cursor: pointer; margin: 10px 5px; 
+            border-radius: 4px; font-size: 1rem;
+            transition: background 0.2s;
+        }
+        button:active { background: #333; }
+        .btn-outline { background: transparent; color: #5d5d5d; border: 1px solid #5d5d5d; }
+
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 8px; 
+            margin-top: 10px;
+            padding-bottom: 80px;
+        }
+        .grid img { 
+            width: 100%; 
+            aspect-ratio: 1/1; 
+            object-fit: cover; 
+            border-radius: 2px; 
+            cursor: zoom-in;
+            background: #e6e0d5; /* 預載位顏色 */
+        }
+
+        #lightbox {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; 
+            width: 100%; height: 100%;
+            background: #f2ede4; 
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+
+        #lightbox img {
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+        }
+
+        .fixed-controls {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%); z-index: 1000;
+            display: none;
+        }
+
+        #main-section { display: block; }
+        #gallery-section { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-section">
+        <h1>｜д•´)!!</h1>
+        <p>偷看別人的紙條，好像不錯。</p>
+        <div class="note-box"><img id="note-img" src="" alt="紙條內容"></div>
+        <div class="controls">
+            <button onclick="draw()">再偷看一張</button>
+            <button class="btn-outline" onclick="showAll()">看全部</button>
+        </div>
+    </div>
+
+    <div class="container" id="gallery-section">
+        <div class="grid" id="grid-content"></div>
+    </div>
+
+    <div id="lightbox" onclick="closeLightbox()">
+        <img id="lightbox-img" src="" alt="放大檢視">
+    </div>
+
+    <div class="fixed-controls" id="back-btn">
+        <button onclick="hideAll()">回到抽籤</button>
+    </div>
+
+<script>
+    const total = 146; 
+    const folder = "images";
+    const ext = ".webp"; // 已優化為 webp 格式
+    let lastNum = 0;
+
+    const imgElement = document.getElementById('note-img');
+
+    function draw() {
+        let num;
+        do { 
+            num = Math.floor(Math.random() * total) + 1; 
+        } while (num === lastNum);
+        
+        lastNum = num;
+        
+        // 重置動畫狀態
+        imgElement.classList.remove('loaded');
+        
+        // 加上隨機參數防止快取 (可選)
+        const path = `${folder}/${num}${ext}?v=${new Date().getTime()}`;
+        
+        // 延遲一點點更換圖片，讓動畫更有感
+        setTimeout(() => {
+            imgElement.src = path;
+            imgElement.onload = () => { 
+                imgElement.classList.add('loaded'); 
+            };
+        }, 150);
+    }
+
+    function showAll() {
+        document.getElementById('main-section').style.display = 'none';
+        document.getElementById('gallery-section').style.display = 'block';
+        document.getElementById('back-btn').style.display = 'block';
+        
+        const grid = document.getElementById('grid-content');
+        if (grid.innerHTML === "") {
+            const fragment = document.createDocumentFragment();
+            for (let i = 1; i <= total; i++) {
+                const item = document.createElement('img');
+                const src = `${folder}/${i}${ext}`;
+                item.src = src;
+                item.loading = "lazy"; // 延遲載入提升效量
+                item.alt = `紙條 ${i}`;
+                item.onclick = () => openLightbox(src);
+                fragment.appendChild(item);
+            }
+            grid.appendChild(fragment);
+        }
+        window.scrollTo(0, 0);
+    }
+
+    function openLightbox(src) {
+        const lb = document.getElementById('lightbox');
+        const lbImg = document.getElementById('lightbox-img');
+        lbImg.src = src;
+        lb.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        document.getElementById('lightbox').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function hideAll() {
+        document.getElementById('gallery-section').style.display = 'none';
+        document.getElementById('back-btn').style.display = 'none';
+        document.getElementById('main-section').style.display = 'block';
+        window.scrollTo(0, 0);
+    }
+
+    // 初始化
+    window.onload = draw;
+</script>
+</body>
+</html>
