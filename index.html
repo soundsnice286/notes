@@ -26,7 +26,7 @@
             align-items: center; 
             justify-content: center;
             margin-bottom: 20px;
-            perspective: 1000px; /* 為動畫增加透視感 */
+            perspective: 1000px; 
         }
 
         #note-img { 
@@ -38,7 +38,6 @@
             transition: opacity 0.4s ease, transform 0.4s ease; 
         }
 
-        /* 圖片載入後的動畫狀態 */
         #note-img.loaded {
             opacity: 1;
             transform: translateY(0);
@@ -66,7 +65,7 @@
             object-fit: cover; 
             border-radius: 2px; 
             cursor: zoom-in;
-            background: #e6e0d5; /* 預載位顏色 */
+            background: #e6e0d5; 
         }
 
         #lightbox {
@@ -104,7 +103,7 @@
         <p>偷偷地看紙條，好像不錯。</p>
         <div class="note-box"><img id="note-img" src="" alt="紙條內容"></div>
         <div class="controls">
-            <button onclick="draw()">再看一張</button>
+            <button onclick="draw()">再偷看一張</button>
             <button class="btn-outline" onclick="showAll()">我全都要</button>
         </div>
     </div>
@@ -118,32 +117,37 @@
     </div>
 
     <div class="fixed-controls" id="back-btn">
-        <button onclick="hideAll()">回去抽紙條</button>
+        <button onclick="hideAll()">回到抽籤</button>
     </div>
 
 <script>
-    const total = 142;     // 圖片張數
+// ==========================================
+    // ⭐ 修改這裡：圖片總張數（目前是 143）
+    // =========================================
+    const total = 143;     
     const folder = "images";
-    const ext = ".webp"; // 已優化為 webp 格式
-    let lastNum = 0;
-
+    const ext = ".webp"; 
+    
+    let pool = []; 
     const imgElement = document.getElementById('note-img');
 
+    function shufflePool() {
+        pool = Array.from({length: total}, (_, i) => i + 1);
+        for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+    }
+
     function draw() {
-        let num;
-        do { 
-            num = Math.floor(Math.random() * total) + 1; 
-        } while (num === lastNum);
-        
-        lastNum = num;
-        
-        // 重置動畫狀態
+        if (pool.length === 0) {
+            shufflePool();
+        }
+
+        const num = pool.pop();
         imgElement.classList.remove('loaded');
-        
-        // 加上隨機參數防止快取 (可選)
         const path = `${folder}/${num}${ext}?v=${new Date().getTime()}`;
         
-        // 延遲一點點更換圖片，讓動畫更有感
         setTimeout(() => {
             imgElement.src = path;
             imgElement.onload = () => { 
@@ -164,7 +168,7 @@
                 const item = document.createElement('img');
                 const src = `${folder}/${i}${ext}`;
                 item.src = src;
-                item.loading = "lazy"; // 延遲載入提升效量
+                item.loading = "lazy";
                 item.alt = `紙條 ${i}`;
                 item.onclick = () => openLightbox(src);
                 fragment.appendChild(item);
@@ -194,12 +198,7 @@
         window.scrollTo(0, 0);
     }
 
-    // 初始化
     window.onload = draw;
 </script>
 </body>
-
 </html>
-
-
-
