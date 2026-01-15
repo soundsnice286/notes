@@ -88,3 +88,152 @@
             align-items: center;
             cursor: zoom-out;
         }
+
+        #lightbox img {
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+        }
+
+        .fixed-controls {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%); z-index: 1000;
+            display: none;
+        }
+
+        /* 🤫 隱身計數器樣式：平常看不見，反白才出現 */
+        #counter-area {
+            margin-top: 100px;
+            font-size: 10px;
+            color: #f2ede4; /* 跟背景色一樣，達成隱形 */
+            user-select: text !important; /* 強制允許選取 */
+        }
+        #counter-area img {
+            height: 12px;
+            opacity: 0.01; /* 極低透明度，平常看不見 */
+            filter: grayscale(100%);
+        }
+        /* 當該區域被選取時 */
+        #counter-area::selection {
+            background: #5d5d5d;
+            color: #ffffff;
+        }
+        #counter-area img::selection {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-section">
+        <h1> (´⊙ω⊙`)</h1>
+        <p>偷偷地看紙條，好像不錯。</p>
+        
+        <div class="note-box">
+            <div id="loading-text">正在翻閱紙條...</div>
+            <img id="note-img" src="" alt="紙條內容">
+        </div>
+
+        <div class="controls">
+            <button onclick="draw()">再看一張</button>
+            <button class="btn-outline" onclick="showAll()">我全都要</button>
+        </div>
+
+        <div id="counter-area">
+            . stats: <img src="https://count.getloli.com/get/@soundsnice286_notes?theme=moebooru" alt="hits">
+        </div>
+    </div>
+
+    <div class="container" id="gallery-section">
+        <div class="grid" id="grid-content"></div>
+    </div>
+
+    <div id="lightbox" onclick="closeLightbox()">
+        <img id="lightbox-img" src="" alt="放大檢視">
+    </div>
+
+    <div class="fixed-controls" id="back-btn">
+        <button onclick="hideAll()">回去抽紙條</button>
+    </div>
+
+<script>
+    // ==========================================
+    // ⭐ 修改這裡：圖片總張數
+    // ==========================================
+    const total = 176;     
+    
+    const folder = "images";
+    const ext = ".webp"; 
+    
+    let pool = []; 
+    const imgElement = document.getElementById('note-img');
+    const loadingText = document.getElementById('loading-text');
+
+    function shufflePool() {
+        pool = Array.from({length: total}, (_, i) => i + 1);
+        for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+    }
+
+    function draw() {
+        if (pool.length === 0) { shufflePool(); }
+        const num = pool.pop();
+        imgElement.classList.remove('loaded');
+        loadingText.style.display = 'block';
+        const path = `${folder}/${num}${ext}?v=${new Date().getTime()}`;
+        
+        setTimeout(() => {
+            imgElement.src = path;
+            imgElement.onload = () => { 
+                imgElement.classList.add('loaded'); 
+                loadingText.style.display = 'none';
+            };
+        }, 150);
+    }
+
+    function showAll() {
+        document.getElementById('main-section').style.display = 'none';
+        document.getElementById('gallery-section').style.display = 'block';
+        document.getElementById('back-btn').style.display = 'block';
+        const grid = document.getElementById('grid-content');
+        if (grid.innerHTML === "") {
+            const fragment = document.createDocumentFragment();
+            for (let i = 1; i <= total; i++) {
+                const item = document.createElement('img');
+                const src = `${folder}/${i}${ext}`;
+                item.src = src;
+                item.loading = "lazy";
+                item.onclick = () => openLightbox(src);
+                fragment.appendChild(item);
+            }
+            grid.appendChild(fragment);
+        }
+        window.scrollTo(0, 0);
+    }
+
+    function openLightbox(src) {
+        const lb = document.getElementById('lightbox');
+        const lbImg = document.getElementById('lightbox-img');
+        lbImg.src = src;
+        lb.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        document.getElementById('lightbox').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function hideAll() {
+        document.getElementById('gallery-section').style.display = 'none';
+        document.getElementById('back-btn').style.display = 'none';
+        document.getElementById('main-section').style.display = 'block';
+        window.scrollTo(0, 0);
+    }
+
+    window.onload = draw;
+</script>
+</body>
+</html>
