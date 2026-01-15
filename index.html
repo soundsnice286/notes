@@ -99,13 +99,9 @@
 <body>
 
     <div class="container" id="main-section">
-        <h1> (´⊙ω⊙`)</h1>
+        <h1>｜д•´)!!</h1>
         <p>偷偷地看紙條，好像不錯。</p>
-        
-        <div class="note-box">
-            <img id="note-img" src="" alt="紙條內容">
-        </div>
-
+        <div class="note-box"><img id="note-img" src="" alt="紙條內容"></div>
         <div class="controls">
             <button onclick="draw()">再看一張</button>
             <button class="btn-outline" onclick="showAll()">我全都要</button>
@@ -125,11 +121,7 @@
     </div>
 
 <script>
-    // ==========================================
-    // ⭐ 修改這裡：圖片總張數
-    // ==========================================
-    const total = 176;     
-    
+    const total = 166;     
     const folder = "images";
     const ext = ".webp"; 
     
@@ -145,15 +137,14 @@
     }
 
     function draw() {
-        if (pool.length === 0) { shufflePool(); }
+        if (pool.length === 0) {
+            shufflePool();
+        }
+
         const num = pool.pop();
-        
-        // 隱藏當前圖片
         imgElement.classList.remove('loaded');
-        
         const path = `${folder}/${num}${ext}?v=${new Date().getTime()}`;
         
-        // 短暫延遲後切換圖片路徑，確保動畫流暢
         setTimeout(() => {
             imgElement.src = path;
             imgElement.onload = () => { 
@@ -166,6 +157,7 @@
         document.getElementById('main-section').style.display = 'none';
         document.getElementById('gallery-section').style.display = 'block';
         document.getElementById('back-btn').style.display = 'block';
+        
         const grid = document.getElementById('grid-content');
         if (grid.innerHTML === "") {
             const fragment = document.createDocumentFragment();
@@ -174,6 +166,7 @@
                 const src = `${folder}/${i}${ext}`;
                 item.src = src;
                 item.loading = "lazy";
+                item.alt = `紙條 ${i}`;
                 item.onclick = () => openLightbox(src);
                 fragment.appendChild(item);
             }
@@ -196,3 +189,13 @@
     }
 
     function hideAll() {
+        document.getElementById('gallery-section').style.display = 'none';
+        document.getElementById('back-btn').style.display = 'none';
+        document.getElementById('main-section').style.display = 'block';
+        window.scrollTo(0, 0);
+    }
+
+    window.onload = draw;
+</script>
+</body>
+</html>
