@@ -27,7 +27,6 @@
             justify-content: center;
             margin-bottom: 20px;
             perspective: 1000px; 
-            position: relative;
         }
 
         #note-img { 
@@ -37,19 +36,11 @@
             opacity: 0; 
             transform: translateY(20px);
             transition: opacity 0.4s ease, transform 0.4s ease; 
-            z-index: 2;
         }
 
         #note-img.loaded {
             opacity: 1;
             transform: translateY(0);
-        }
-
-        #loading-text {
-            position: absolute;
-            color: #b5af9f;
-            font-size: 0.9rem;
-            z-index: 1;
         }
 
         button { 
@@ -101,26 +92,8 @@
             display: none;
         }
 
-        /* 🤫 隱身計數器樣式：平常看不見，反白才出現 */
-        #counter-area {
-            margin-top: 100px;
-            font-size: 10px;
-            color: #f2ede4; /* 跟背景色一樣，達成隱形 */
-            user-select: text !important; /* 強制允許選取 */
-        }
-        #counter-area img {
-            height: 12px;
-            opacity: 0.01; /* 極低透明度，平常看不見 */
-            filter: grayscale(100%);
-        }
-        /* 當該區域被選取時 */
-        #counter-area::selection {
-            background: #5d5d5d;
-            color: #ffffff;
-        }
-        #counter-area img::selection {
-            opacity: 1;
-        }
+        #main-section { display: block; }
+        #gallery-section { display: none; }
     </style>
 </head>
 <body>
@@ -130,17 +103,12 @@
         <p>偷偷地看紙條，好像不錯。</p>
         
         <div class="note-box">
-            <div id="loading-text">正在翻閱紙條...</div>
             <img id="note-img" src="" alt="紙條內容">
         </div>
 
         <div class="controls">
             <button onclick="draw()">再看一張</button>
             <button class="btn-outline" onclick="showAll()">我全都要</button>
-        </div>
-
-        <div id="counter-area">
-            . stats: <img src="https://count.getloli.com/get/@soundsnice286_notes?theme=moebooru" alt="hits">
         </div>
     </div>
 
@@ -160,14 +128,13 @@
     // ==========================================
     // ⭐ 修改這裡：圖片總張數
     // ==========================================
-    const total = 166;     
+    const total = 176;     
     
     const folder = "images";
     const ext = ".webp"; 
     
     let pool = []; 
     const imgElement = document.getElementById('note-img');
-    const loadingText = document.getElementById('loading-text');
 
     function shufflePool() {
         pool = Array.from({length: total}, (_, i) => i + 1);
@@ -180,15 +147,17 @@
     function draw() {
         if (pool.length === 0) { shufflePool(); }
         const num = pool.pop();
+        
+        // 隱藏當前圖片
         imgElement.classList.remove('loaded');
-        loadingText.style.display = 'block';
+        
         const path = `${folder}/${num}${ext}?v=${new Date().getTime()}`;
         
+        // 短暫延遲後切換圖片路徑，確保動畫流暢
         setTimeout(() => {
             imgElement.src = path;
             imgElement.onload = () => { 
                 imgElement.classList.add('loaded'); 
-                loadingText.style.display = 'none';
             };
         }, 150);
     }
@@ -227,14 +196,3 @@
     }
 
     function hideAll() {
-        document.getElementById('gallery-section').style.display = 'none';
-        document.getElementById('back-btn').style.display = 'none';
-        document.getElementById('main-section').style.display = 'block';
-        window.scrollTo(0, 0);
-    }
-
-    window.onload = draw;
-</script>
-</body>
-</html>
-
